@@ -22,8 +22,8 @@ public class AddressDTO {
     private String state;
     private String city;
     private String postalCode;
-
     private AddressType addressType;
+
     @JsonBackReference(value = "student-address-reference")
     private StudentDTO student;
     @JsonBackReference(value = "parent-address-reference")
@@ -32,5 +32,14 @@ public class AddressDTO {
     private TeacherDTO teacher;
 
     private Integer currentTemperature;
+
+    /**TODO
+     * consume a third-party API: weatherstack API
+     * Be sure to get your access key
+     * query with the city name
+     * use http, not https because it is free
+     * use FeignClient
+     * In short, we need to call individual address endpoint and take city from there. Then we need to call weatherstack api and pass the city as the parameter. Then extract the temperature value from weatherstack api response and update individual address response with that temperature.
+     */
 
 }
