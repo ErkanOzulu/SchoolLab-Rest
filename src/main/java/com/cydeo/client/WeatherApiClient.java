@@ -9,11 +9,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 public interface WeatherApiClient {
 
 
-    //http://api.weatherstack.com
-    // /current
-    // ?access_key=7ff03d2870ca9d2d809464765b9ea04e
-    // &
-    // query=İstanbul
+    /**http://api.weatherstack.com
+     /current
+     ?access_key=7ff03d2870ca9d2d809464765b9ea04e
+     &
+     query=İstanbul
+     */
 @GetMapping("/current")
 WeatherResponse getCurrentWeather(@RequestParam (value = "access_key")String accessKey, @RequestParam(value = "query")String city);
 
