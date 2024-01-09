@@ -1,0 +1,66 @@
+```CONSUME AN API WITH FEIGN CLIENT 
+
+1.We need to add dependency to our project. 
+	
+	 <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-starter-openfeign</artifactId>
+        <version>3.1.5</version>
+    </dependency>
+
+2.You need to add @EnableFeignClients annotation to your runner class. 
+	This step is independent from the api that you want to consume, It needs to be done before everything. 
+
+3.Next step is creating client interface under client package. so we create client package under cydeo then created WeatherApiClient interface.
+	
+	@FeignClient(url = "http://api.weatherstack.com",name = "WEATHER-CLIENT")
+		public interface WeatherApiClient {
+	
+	    @GetMapping("/current")
+	    WeatherResponse getCurrentWeather(@RequestParam(value = "access_key") String accessKey,
+	                                      @RequestParam(value = "query") String city);
+	}
+
+		we put baseUrl inside the FeignClient annotation. then based on the request type we use mapping annotation and put the endpoint. 
+		In this case we use GET request with 'current' endpoint from the api.
+		since we have 2 query parameter we put their keys and parameters for their values to provide them dynamically.
+
+4.For the return type, we have created our own Pojos so the json will be converted to WeatherResponse and its subclasses. 
+
+
+5.Next step is implementing api to tuse as field in our api response.
+ 	since we use this weather api to return currentTemperature in address field, we implement inside the findById on AddressServiceImpl
+ 	
+    @Override
+    public AddressDTO findById(Long id) throws Exception {
+        Address foundAddress = addressRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("No Address Found!"));
+
+        AddressDTO addressDTO = mapperUtil.convert(foundAddress, new AddressDTO());
+        //we will get the current temperature and set based on city, then return dto
+        addressDTO.setCurrentTemperature(retrieveTemperatureByCity(addressDTO.getCity()));
+
+        return  addressDTO;
+    }
+
+    private Integer retrieveTemperatureByCity(String city) {
+     WeatherResponse weatherResponse = weatherApiClient.getCurrentWeather(accessKey,city);
+
+         if(weatherResponse ==null || weatherResponse.getCurrent() ==null){
+             return null;
+         }
+        return weatherResponse.getCurrent().getTemperature();
+    }
+
+-- If I use data.sql when I try to post a new teacher I can't declare id but creation starts with id=1 so there is already loaded id with data.sql and alredy have id=1 object so I want to continue creation of data where it left off so the solution is add this line"SELECT setval(pg_get_serial_sequence('teacher', 'id'), coalesce(max(id),0) + 1, false) FROM public.teacher;" end of the data.sql file
+
+
+
+
+
+
+
+
+
+
+```
