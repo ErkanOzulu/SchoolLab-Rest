@@ -3,7 +3,6 @@ package com.cydeo.controller;
 import com.cydeo.dto.AddressDTO;
 import com.cydeo.dto.ResponseWrapper;
 import com.cydeo.dto.TeacherDTO;
-import com.cydeo.entity.Address;
 import com.cydeo.service.AddressService;
 import com.cydeo.service.ParentService;
 import com.cydeo.service.StudentService;
@@ -91,19 +90,31 @@ public class SchoolController {
      */
 
     @PutMapping("/address/{id}")
-    public AddressDTO updateById(@PathVariable("id") Long id, @RequestBody AddressDTO addressDTO) throws Exception {
+    public AddressDTO updateAddress(@PathVariable("id") Long id, @RequestBody AddressDTO addressDTO) throws Exception {
        addressDTO.setId(id);
         AddressDTO updatedAddress = addressService.update(addressDTO);
 
         return updatedAddress;
     }
+         /*
+        create an endpoint for creating teacher
+        return Http status 201
+        custom header "teacherId","idCreated"
+        responseWrapper("Teacher is created",teacherInfo)
+     */
 
+    @PostMapping("/teachers")
+    public ResponseEntity<ResponseWrapper> createTeacher( @RequestBody TeacherDTO teacherDTO){
+        TeacherDTO teacher = teacherService.createTeacher(teacherDTO);
 
-/**    https://weatherstack.com/
+        ResponseWrapper responseWrapper = new ResponseWrapper(true,"Teacher is created."
+                ,HttpStatus.CREATED.value(),teacher);
 
- http://api.weatherstack.com/current
- ? access_key = 7ff03d2870ca9d2d809464765b9ea04e
- & query = New York
- */
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .header("teacherId",String.valueOf(teacher.getId()))
+                .body(responseWrapper);
+
+    }
+
 
 }
