@@ -10,6 +10,7 @@ import com.cydeo.exception.NotFoundException;
 import com.cydeo.util.MapperUtil;
 import com.cydeo.repository.AddressRepository;
 import com.cydeo.service.AddressService;
+import feign.FeignException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -35,10 +36,18 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public List<AddressDTO> findAll() {
-        return addressRepository.findAll()
+        List<AddressDTO> addresses = addressRepository.findAll()
                 .stream()
-                .map(address -> mapperUtil.convert(address, new AddressDTO()))
-                .collect(Collectors.toList());
+                .map(address -> mapperUtil.convert(address, new AddressDTO())).
+                collect(Collectors.toList());
+        for (AddressDTO addressDTO : addresses) {
+
+            addressDTO.setCurrentTemperature(retrieveTemperatureByCity(addressDTO.getCity()));
+            addressDTO.setFlag(retrieveFlagByCountry(addressDTO.getCountry()));
+        }
+
+        return addresses;
+
     }
 
     @Override
@@ -53,18 +62,25 @@ public class AddressServiceImpl implements AddressService {
     }
 
     private String retrieveFlagByCountry(String country) {
-        List<CountryResponse> countryResponses = countryApiClient.getCountry(country);
-        if (countryResponses==null || countryResponses.get(0).getFlags().getPng()==null){
-            return null;
-        }
-        return countryResponses.get(0).getFlags().getPng();
+        try {
+            List<CountryResponse> countryResponses = countryApiClient.getCountry(country);
 
+            if (countryResponses.size() == 0 || countryResponses.get(0).getFlags().getPng() == null) {
+                return "Flag not found";
+            }
+            return countryResponses.get(0).getFlags().getPng();
+        } catch (FeignException.NotFound e) {
+            return "Flag not found";
+        }
     }
+
+
+
 
     private Integer retrieveTemperatureByCity(String city) {
 
         WeatherResponse weatherResponse = weatherApiClient.getCurrentWeather(accessKey, city);
-        if (weatherResponse==null || weatherResponse.getCurrent()==null){
+        if (weatherResponse == null || weatherResponse.getCurrent() == null) {
             return null;
         }
         return weatherResponse.getCurrent().getTemperature();

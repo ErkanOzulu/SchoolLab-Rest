@@ -75,6 +75,7 @@ public class SchoolController {
            success true
            and address information
         */
+
     @GetMapping("/address/{id}")
     public ResponseEntity<ResponseWrapper> getAdressById(@PathVariable("id") Long id) throws Exception {
 
@@ -82,7 +83,11 @@ public class SchoolController {
         return ResponseEntity
                 .ok(new ResponseWrapper("address " + id + " is successfully retrieved", addressService.findById(id)));
     }
+    @GetMapping("/address")
+    public ResponseEntity<List<AddressDTO>> getAllAddresses() throws Exception {
 
+        return ResponseEntity.ok(addressService.findAll());
+    }
 
 
 /*
